@@ -1,8 +1,7 @@
 import bisect, idaapi, ida_allins, idautils, ida_ua, ida_funcs, idc
 
-#
+# what could possibly go wrong
 CRYPT_MUTEX = 0x00000001C00A1ED8
-#
 
 crypt_calls = {}
 for crypt_handler in map(lambda x: ida_funcs.get_func(x.frm).start_ea, idautils.XrefsTo(CRYPT_MUTEX)):
