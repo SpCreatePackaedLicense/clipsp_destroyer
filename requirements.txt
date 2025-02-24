@@ -1,0 +1,2 @@
+qiling @ git+https://github.com/qilingframework/qiling@9a78d186c97d6ff42d7df31155dda2cd9e1a7fe3
+unicorn==2.1.1
