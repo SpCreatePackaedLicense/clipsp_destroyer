@@ -92,7 +92,6 @@ def choose_decryptors(crypt_calls):
 def get_emu_ranges(chosen_decryptors):
     emu_ranges = []
     for (func_start, func_end, chosen_decryptor) in chosen_decryptors.values():
-        chosen_decryptor
         pred = lambda i: i.itype == ida_allins.NN_lea and i.ops[1].type == ida_ua.o_mem
         emu_start = min(
             get_reg_assign(func_start, chosen_decryptor, "rcx", pred),
