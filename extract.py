@@ -16,28 +16,35 @@ def get_reg_assign(start_ea, end_ea, reg, filter = lambda i: True):
     return idaapi.BADADDR
 
 def h_find_mutex():
-    initialize_evt = idc.get_name_ea(0, "KeInitializeEvent")
+    # why is this so hard
+    initialize_evt = None
+    def f(addr, name, idx):
+        nonlocal initialize_evt
+        if name == "KeInitializeEvent":
+            initialize_evt = addr
+            return False
+        return True
+    idaapi.enum_import_names(0, f)
+    if not initialize_evt: return None
 
+    # what the actual fuck
+    driver_entry = next(filter(lambda x: x[1] == x[2], idautils.Entries()))[3]
     for call in idautils.XrefsTo(initialize_evt):
         calling_func = ida_funcs.get_func(call.frm)
 
         # Called once by driver entry
         candidates = filter(
-            lambda ref: getattr(ida_funcs.get_func(ref.frm), "name", "") == "DriverEntry",
+            lambda ref: getattr(ida_funcs.get_func(ref.frm), "name", "") == driver_entry,
             idautils.XrefsTo(calling_func.start_ea)
         )
 
         if next(candidates, None):
             insn = idaapi.insn_t()
             idaapi.decode_insn(insn, get_reg_assign(calling_func.start_ea, call.frm, "rcx"))
-            # rcx is FastMutex.Event (offset 0x18)
             mutex = insn.ops[1].addr - 0x18
+            print(f"Found mutex {mutex:08X}")
             return mutex
     return None
-
-fallback_mutex = None
-mutex = h_find_mutex() or fallback_mutex
-if not mutex: raise Exception("couldn't find mutex")
 
 """
 Find all references to the CRYPT_MUTEX, these are the (en/de)cryption handlers
