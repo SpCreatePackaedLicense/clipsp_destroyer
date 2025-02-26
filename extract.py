@@ -90,10 +90,9 @@ def choose_decryptors(crypt_calls):
                 if data not in chosen_decryptors:
                     chosen_decryptors[data] = (func_start, func_end, crypt_call)
                 crypt_status[data] = False
-                continue
             else:
                 print(f"discovered {ea:08X} {crypt_call:08X} processing blob {data:08X} (encryptor)")
-                crypt_status[data] = True
+            crypt_status[data] = not crypt_status[data]
     return chosen_decryptors
 
 def get_emu_ranges(chosen_decryptors):
